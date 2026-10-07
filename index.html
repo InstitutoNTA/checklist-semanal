@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklist Semanal · Instituto NTA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6fa; --card:#ffffff; --ink:#1b2333; --muted:#5b6578; --line:#e3e7ef;
+  --navy:#1f3864; --blue:#2e75b6; --soft:#eaf2fb; --ok:#3f8f3a; --okbg:#e8f4e5; --warn:#a46a00; --warnbg:#fff4d6;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0f141c; --card:#171e29; --ink:#e7ecf3; --muted:#9aa6b8; --line:#273142;
+    --navy:#8fb4e8; --blue:#5aa0e6; --soft:#1c2a3d; --ok:#7cc576; --okbg:#18301a; --warn:#e6b347; --warnbg:#33290f; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Arial,sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:980px;margin:0 auto;padding:28px 16px 60px}
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+h1{margin:0;font-size:26px;color:var(--navy);letter-spacing:-.01em}
+.sub{margin:4px 0 0;color:var(--muted);font-size:14px}
+.week{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.week label{font-size:13px;color:var(--muted)}
+.week input{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.week .range{font-size:13px;color:var(--muted)}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px}
+button:hover{border-color:var(--blue)}
+.summary{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px}
+.sumtop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.pct{font-size:28px;font-weight:700;color:var(--navy)}
+.count{color:var(--muted);font-size:14px}
+.bar{height:10px;border-radius:99px;background:var(--soft);overflow:hidden;margin:10px 0 14px}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.dchip{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;display:flex;justify-content:space-between;gap:6px;cursor:pointer;background:transparent;color:var(--ink);text-align:left}
+.dchip b{font-weight:600}
+.dchip.done{background:var(--okbg);border-color:transparent;color:var(--ok)}
+.dchip.today{outline:2px solid var(--blue);outline-offset:-2px}
+section.day{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.dayhead{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:var(--soft);gap:8px}
+.dayhead h2{margin:0;font-size:16px;color:var(--navy)}
+.dayhead .date{font-weight:500;color:var(--muted);font-size:13px;margin-left:6px}
+.dayhead .mini{font-size:13px;color:var(--muted)}
+.badge{font-size:11px;font-weight:600;background:var(--blue);color:#fff;border-radius:99px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+ul{list-style:none;margin:0;padding:0}
+li{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:12px 18px;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+li input[type=checkbox]{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ok);cursor:pointer}
+.title{font-weight:500}
+li.checked{background:var(--okbg)}
+li.checked .title{text-decoration:line-through;color:var(--ok)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:5px;font-size:13px;color:var(--muted)}
+.meta a{color:var(--blue);text-decoration:none;font-weight:500}
+.meta a:hover{text-decoration:underline}
+.tag{display:inline-block;padding:1px 8px;border-radius:6px;background:var(--soft);color:var(--ink);font-size:12px}
+.tag.none{background:var(--warnbg);color:var(--warn)}
+.note{width:100%;margin-top:8px;font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink)}
+footer{color:var(--muted);font-size:12px;margin-top:24px;text-align:center}
+@media (max-width:560px){h1{font-size:22px} li{padding:12px 14px} .dayhead{padding:10px 14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Checklist Semanal</h1>
+      <p class="sub">Acesse os links de cada atividade e marque quando concluir.</p>
+    </div>
+    <div class="week">
+      <label for="wk">Semana de</label>
+      <input type="date" id="wk">
+      <span class="range" id="range"></span>
+      <button id="reset" title="Desmarca todas as atividades desta semana">Limpar semana</button>
+    </div>
+  </header>
+
+  <div class="summary">
+    <div class="sumtop">
+      <div><span class="pct" id="pct">0%</span> <span class="count" id="count"></span></div>
+    </div>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="days" id="daychips"></div>
+  </div>
+
+  <main id="list"></main>
+  <footer>Instituto NTA · Time de CS · As marcações ficam salvas neste navegador, separadas por semana.</footer>
+</div>
+
+<script>
+const ATIVIDADES = [
+ {dia:"Segunda", t:"Mentoria IA Negócios - EmpregaDados (antiga)", link:"https://membros.empregadados.com.br/", local:"", dest:""},
+ {dia:"Segunda", t:"Inglês Básico EmpregaDados e Pós Eng. Dados e IA - Edição Vídeo", link:"https://institutonta.curseduca.pro/admin/home", local:"", dest:"workshop - inglês, inglês p/ carreira de dados e IA, Aceleração Inglês Básico - vimeo"},
+ {dia:"Segunda", t:"Estágio", link:"", local:"Projeto Estágio", dest:""},
+ {dia:"Terça", t:"Vídeo Mentoria Bianca - EmpregaDados", link:"https://studio.youtube.com/channel/UCSAIAkpkuuP_lxAr5ixDFnw", local:"", dest:"Dúvidas: Entrevista e Carreira"},
+ {dia:"Terça", t:"Aula de Inglês Profissionais de TI - Arquitetura Avançada (Básico)", link:"", local:"Inglês Básico", dest:""},
+ {dia:"Terça", t:"Mentorias Bianca TFTEC - Semanas Alternadas", link:"", local:"Aulas Carreira em cloud - TFTEC", dest:""},
+ {dia:"Terça", t:"Projeto EmpregaDados - Geovany / Edição Vídeo, Plataforma e capa", link:"", local:"", dest:""},
+ {dia:"Terça", t:"Clube de Soft Skills", link:"", local:"Clube Softskill", dest:""},
+ {dia:"Quarta", t:"Inglês Interm / Avançado EmpregaDados - Eng. Dados e IA - Edição", link:"https://institutonta.curseduca.pro/admin/home", local:"", dest:"workshop - inglês, inglês p/ carreira de dados e IA, Aceleração Inglês Básico - vimeo"},
+ {dia:"Quarta", t:"Aceleração EmpregaDados - plataforma na aceleração", link:"", local:"", dest:"vimeo - pasta aceleração enviar para Ana Clara"},
+ {dia:"Quinta", t:"Aula de Inglês Profissionais de TI - Arquitetura Avançada (Avançado)", link:"", local:"Inglês Avançado", dest:""},
+ {dia:"Quinta", t:"Vídeo Mentoria Bianca - EmpregaDados", link:"https://studio.youtube.com/channel/UCSAIAkpkuuP_lxAr5ixDFnw", local:"", dest:"Dúvidas: Entrevista e Carreira"},
+ {dia:"Quinta", t:"Projeto IA - (Workshop e EmpregaDados) - Edição Vídeo e Plataforma", link:"", local:"", dest:"Curseduca - Workshop e EmpregaDados"},
+ {dia:"Quinta", t:"Estágio", link:"", local:"Projeto Estágio", dest:""}
+];
+const DIAS = ["Segunda","Terça","Quarta","Quinta","Sexta"];
+const usados = DIAS.filter(d => ATIVIDADES.some(a => a.dia === d));
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)) }catch(e){} }
+};
+let mem = {};
+
+function mondayOf(d){ const x=new Date(d); const w=(x.getDay()+6)%7; x.setDate(x.getDate()-w); x.setHours(12,0,0,0); return x; }
+function iso(d){ return d.toISOString().slice(0,10); }
+function br(d){ return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"}); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+
+let segunda = mondayOf(new Date());
+const key = () => "checklist-nta-" + iso(segunda);
+function load(){ return store.get(key()) || mem[key()] || {done:{}, notes:{}}; }
+function save(s){ mem[key()] = s; store.set(key(), s); }
+
+function render(){
+  const s = load();
+  $("wk").value = iso(segunda);
+  $("range").textContent = "até " + addDays(segunda,4).toLocaleDateString("pt-BR");
+  const hoje = iso(new Date(new Date().setHours(12,0,0,0)));
+  const main = $("list"); main.innerHTML = "";
+  usados.forEach(dia => {
+    const idx = DIAS.indexOf(dia), data = addDays(segunda, idx);
+    const itens = ATIVIDADES.map((a,i)=>({...a,i})).filter(a=>a.dia===dia);
+    const feitos = itens.filter(a=>s.done[a.i]).length;
+    const sec = document.createElement("section"); sec.className="day"; sec.id="dia-"+dia;
+    sec.innerHTML = `<div class="dayhead"><h2>${dia}<span class="date">${br(data)}</span>${iso(data)===hoje?'<span class="badge">Hoje</span>':''}</h2><span class="mini">${feitos} de ${itens.length}</span></div>`;
+    const ul = document.createElement("ul");
+    itens.forEach(a => {
+      const li = document.createElement("li"); if(s.done[a.i]) li.className="checked";
+      let meta = "";
+      if(a.link){ const host=new URL(a.link).hostname.replace("www.",""); meta += `<a href="${a.link}" target="_blank" rel="noopener">🔗 Abrir ${host}</a>`; }
+      else if(a.local){ meta += `<span class="tag">📁 ${a.local}</span>`; }
+      else { meta += `<span class="tag none">sem link</span>`; }
+      if(a.dest) meta += `<span>${a.dest}</span>`;
+      li.innerHTML = `<input type="checkbox" id="c${a.i}" ${s.done[a.i]?"checked":""} aria-label="Marcar como concluída">
+        <div><label for="c${a.i}" class="title">${a.t}</label><div class="meta">${meta}</div>
+        <input class="note" placeholder="Observação (opcional)" value="${(s.notes[a.i]||"").replace(/"/g,"&quot;")}" data-i="${a.i}"></div>`;
+      ul.appendChild(li);
+    });
+    sec.appendChild(ul); main.appendChild(sec);
+  });
+  main.querySelectorAll("input[type=checkbox]").forEach(cb => cb.addEventListener("change", e => {
+    const st = load(); const i = e.target.id.slice(1); if(e.target.checked) st.done[i]=true; else delete st.done[i]; save(st); render();
+  }));
+  main.querySelectorAll(".note").forEach(n => n.addEventListener("change", e => {
+    const st = load(); st.notes[e.target.dataset.i] = e.target.value; save(st);
+  }));
+  // resumo
+  const total = ATIVIDADES.length, feitos = Object.keys(s.done).length, p = Math.round(feitos/total*100);
+  $("pct").textContent = p + "%"; $("count").textContent = `${feitos} de ${total} atividades concluídas`;
+  $("barfill").style.width = p + "%";
+  const chips = $("daychips"); chips.innerHTML = "";
+  usados.forEach(dia => {
+    const its = ATIVIDADES.map((a,i)=>i).filter(i=>ATIVIDADES[i].dia===dia), f = its.filter(i=>s.done[i]).length;
+    const b = document.createElement("button"); b.className = "dchip" + (f===its.length?" done":"") + (iso(addDays(segunda,DIAS.indexOf(dia)))===hoje?" today":"");
+    b.innerHTML = `<b>${dia}</b><span>${f}/${its.length}</span>`;
+    b.onclick = () => $("dia-"+dia).scrollIntoView({behavior:"smooth"});
+    chips.appendChild(b);
+  });
+}
+$("wk").addEventListener("change", e => { if(e.target.value){ segunda = mondayOf(e.target.value+"T12:00:00"); render(); } });
+$("reset").addEventListener("click", () => { save({done:{}, notes:{}}); render(); });
+render();
+</script>
+</body>
+</html>
